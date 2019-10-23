@@ -7,7 +7,12 @@ import json
 import jsonify
 import calendar
 
+#from flask.ext.cors import CORS, cross_origin
+from flask_cors import CORS, cross_origin
+
 app = Flask(__name__, template_folder='templates/')
+CORS(app)
+
 cal = calendar.Calendar()
 
 
@@ -50,15 +55,14 @@ def home():
     stockdata = get_price(8, "TSLA")
     company = "TSLA"
     get_polarity();
+    get_title_guardian()
     return render_template('graph.html', stockdata=stockdata, company=company)
-
-
-
 
 
 stock = {
     "stock": "TSLA",
     "price": 10.00,
+    "polScore": .67,
     "stocks": [
         {
             'stock': 'TSLA',
@@ -71,13 +75,21 @@ stock = {
     ]
 }
 
-y = json.dumps(stock)
-
 @app.route('/api/test', methods=['GET'])
 def apiRequest():
-    return y
+    return json.dumps(stock)
 
+def get_title_guardian():
+    api_key = '0c02b6f1-c863-430b-99c2-568f0ab32aa9'
+    url_base = "https://content.guardianapis.com/search?q=Facebook&from-date=2019-01-01&api-key={}"
+    final_url = (url_base.format(api_key))
+    response = requests.get(final_url)
+    data = response.json()
 
+    for items in data['response']['results']:
+        print (items['webTitle'])
+
+    return data
 
 
 @app.route('/hello')
