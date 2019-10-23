@@ -48,6 +48,18 @@ def get_polarity():
     print("Polarity Score:")
     print(test_phrase.sentiment.polarity);
 
+def get_title_guardian():
+    api_key = '0c02b6f1-c863-430b-99c2-568f0ab32aa9'
+    url_base = "https://content.guardianapis.com/search?q=Facebook&from-date=2019-01-01&api-key={}"
+    final_url = (url_base.format(api_key))
+    response = requests.get(final_url)
+    data = response.json()
+
+    for items in data['response']['results']:
+        print (items['webTitle'])
+
+    return data
+
 #eventuall we will not need this
 @app.route('/')
 def home():
@@ -73,43 +85,37 @@ stock = {
     ]
 }
 
-def get_title_guardian():
-    api_key = '0c02b6f1-c863-430b-99c2-568f0ab32aa9'
-    url_base = "https://content.guardianapis.com/search?q=Facebook&from-date=2019-01-01&api-key={}"
-    final_url = (url_base.format(api_key))
-    response = requests.get(final_url)
-    data = response.json()
-
-    for items in data['response']['results']:
-        print (items['webTitle'])
-
-    return data
-
 #APIs
 @app.route('/api/test', methods=['GET'])
 def apiRequest():
     return json.dumps(stock)
 
-@app.route('/api/stockdata', methods=['GET'])
-def apiStockData():
-    stockdata = get_price(8, "TSLA")
-    return('Processing Stock Data')
-
 #a user would call this API and ask for stock data about a given company for a given month
-@app.route('/api/stockdata/<string:company_id>/<int:month>', methods=['GET'])
-def get_Stock_Data(company_id, month):
-    company = company_id
+#should users have to pass in the company ticker or name?
+@app.route('/api/stockdata/<string:company_ticker>/<int:month>', methods=['GET'])
+def get_Stock_Data(company_ticker, month):
+    ticker = company_ticker
     month = month
-    if len(company) == 0:
+
+    if len(ticker) == 0:
         abort(404)
     if not month in range(1,13):
         abort(404)
-        
-    return jsonify({'company': company },{'month': month })
 
-@app.route('/api/polarity', methods=['GET'])
-def apiPolarity():
-    return('Polarity Score')
+    stockdata = get_price(month, ticker)
+    jsonify(stockdata)
+
+    return jsonify({'Stock': ticker },{'month': month },{'Stock data':stockdata})
+
+#a user would call this API and ask for the polarity score for a given company
+@app.route('/api/polarity/<string:company_id>', methods=['GET'])
+def apiPolarity(company_id):
+    company = company_id
+
+    if len(company) == 0:
+        abort(404)
+
+    return jsonify({'Polarity Score': company })
 
 @app.errorhandler(404)
 def not_found(error):
