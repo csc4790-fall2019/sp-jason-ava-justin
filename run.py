@@ -95,12 +95,21 @@ def apiStockData():
     stockdata = get_price(8, "TSLA")
     return('Processing Stock Data')
 
-@app.route('/api/stockdata/<string:company_id>', methods=['GET'])
-def get_Stock_Data(company_id):
+#a user would call this API and ask for stock data about a given company for a given month
+@app.route('/api/stockdata/<string:company_id>/<int:month>', methods=['GET'])
+def get_Stock_Data(company_id, month):
     company = company_id
+    month = month
     if len(company) == 0:
         abort(404)
-    return jsonify({'company': company })
+    if not month in range(1,13):
+        abort(404)
+        
+    return jsonify({'company': company },{'month': month })
+
+@app.route('/api/polarity', methods=['GET'])
+def apiPolarity():
+    return('Polarity Score')
 
 @app.errorhandler(404)
 def not_found(error):
