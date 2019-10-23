@@ -4,6 +4,7 @@ import requests
 import re
 import logging
 import json
+import jsonify
 import calendar
 
 app = Flask(__name__, template_folder='templates/')
@@ -51,9 +52,38 @@ def home():
     get_polarity();
     return render_template('graph.html', stockdata=stockdata, company=company)
 
+
+
+
+
+stock = {
+    "stock": "TSLA",
+    "price": 10.00,
+    "stocks": [
+        {
+            'stock': 'TSLA',
+            'price': '10.00'
+        },
+        {
+            'stock': 'FB',
+            'price': '5.00'
+        }
+    ]
+}
+
+y = json.dumps(stock)
+
+@app.route('/api/test', methods=['GET'])
+def apiRequest():
+    return y
+
+
+
+
 @app.route('/hello')
 def hello():
-    return render_template('hello.html')
+    testdata = "Test Data"
+    return render_template('hello.html', testdata=testdata)
 
 
 if __name__ == '__main__':
