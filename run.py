@@ -1,10 +1,9 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify, abort, make_response, request, url_for
 from textblob import TextBlob
 import requests
 import re
 import logging
 import json
-import jsonify
 import calendar
 
 #from flask.ext.cors import CORS, cross_origin
@@ -14,7 +13,6 @@ app = Flask(__name__, template_folder='templates/')
 CORS(app)
 
 cal = calendar.Calendar()
-
 
 LOGGER = logging.getLogger('app')
 LOGGER.setLevel(logging.INFO)
@@ -58,6 +56,10 @@ def home():
     get_title_guardian()
     return render_template('graph.html', stockdata=stockdata, company=company)
 
+@app.route('/hello')
+def hello():
+    testdata = "Test Data"
+    return render_template('hello.html', testdata=testdata)
 
 stock = {
     "stock": "TSLA",
@@ -75,10 +77,6 @@ stock = {
     ]
 }
 
-@app.route('/api/test', methods=['GET'])
-def apiRequest():
-    return json.dumps(stock)
-
 def get_title_guardian():
     api_key = '0c02b6f1-c863-430b-99c2-568f0ab32aa9'
     url_base = "https://content.guardianapis.com/search?q=Facebook&from-date=2019-01-01&api-key={}"
@@ -91,12 +89,22 @@ def get_title_guardian():
 
     return data
 
+#APIs
+@app.route('/api/test', methods=['GET'])
+def apiRequest():
+    return json.dumps(stock)
 
-@app.route('/hello')
-def hello():
-    testdata = "Test Data"
-    return render_template('hello.html', testdata=testdata)
+@app.route('/api/stockdata', methods=['GET'])
+def apiStockData():
+    stockdata = get_price(8, "TSLA")
+    return('Processing Stock Data')
 
+@app.route('/api/stockdata/<string:company_id>', methods=['GET'])
+def get_Stock_Data(company_id):
+    company = company_id
+    if len(company) == 0:
+        abort(404)
+    return jsonify({'company': company })
 
 if __name__ == '__main__':
     app.run()(debug=True, host='0.0.0.0')
