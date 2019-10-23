@@ -48,6 +48,7 @@ def get_polarity():
     print("Polarity Score:")
     print(test_phrase.sentiment.polarity);
 
+#eventuall we will not need this
 @app.route('/')
 def home():
     stockdata = get_price(8, "TSLA")
@@ -55,11 +56,6 @@ def home():
     get_polarity();
     get_title_guardian()
     return render_template('graph.html', stockdata=stockdata, company=company)
-
-@app.route('/hello')
-def hello():
-    testdata = "Test Data"
-    return render_template('hello.html', testdata=testdata)
 
 stock = {
     "stock": "TSLA",
