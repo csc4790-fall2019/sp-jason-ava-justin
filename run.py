@@ -130,7 +130,12 @@ def apiPolarity(company_id):
     if len(company) == 0:
         abort(404)
 
-    return jsonify({'Polarity Score': company })
+    #call future methods to get data about a company then run polarity analysis on it
+    test_phrase = "Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst"
+    test_phrase = TextBlob(test_phrase);
+    polarity = test_phrase.sentiment.polarity
+
+    return jsonify({'Polarity Score': polarity })
 
 @app.errorhandler(404)
 def not_found(error):
