@@ -6,7 +6,7 @@ export default class Display extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      response: null,
+      response: ['null','null'],
       polScore: -999,
       datapoints: []
     }
@@ -15,7 +15,7 @@ export default class Display extends React.Component{
   componentDidMount() {
     try{
       (async () => {
-        const response = await fetch('http://127.0.0.1:5000/api/test',{
+        const response = await fetch('http://127.0.0.1:5000/api/stockdata/TSLA/8',{
           headers : {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -23,12 +23,11 @@ export default class Display extends React.Component{
         });
         const res = await response.json()
         console.log(JSON.stringify(res))
-        //debugger;
-        this.setState({
-          response: res.data,
-          polScore: res.polScore
-        });
         debugger;
+        this.setState({
+          response: res.Stockdata,
+          //polScore: res.polScore
+        });
         console.log(this.state.response)
       })()
     }catch(err){
@@ -40,12 +39,11 @@ export default class Display extends React.Component{
 
   render(){
     var data = this.state.response;
-    if(data !=null)
+    if(data.length > 1)
       data.unshift(['x','TSLA'])
     debugger;
     return(
       <div>
-          {this.state.polScore}
           <Chart
             width={'600px'}
             height={'400px'}

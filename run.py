@@ -120,7 +120,17 @@ def get_Stock_Data(company_ticker, month):
     stockdata = get_price(month, ticker)
     jsonify(stockdata)
 
-    return jsonify({'Stock': ticker },{'month': month },{'Stock data':stockdata})
+    stockary = []
+    for key in stockdata:
+        temp = []
+        temp.append(key)
+        temp.append(float(stockdata[key]))
+        stockary.append(temp)
+
+
+    #return jsonify({'Stock': ticker },{'month': month },{'Stockdata':stockary})
+    return jsonify({'Stock': ticker,'month': month, 'Stockdata': stockary})
+
 
 #a user would call this API and ask for the polarity score for a given company
 @app.route('/api/polarity/<string:company_id>', methods=['GET'])
