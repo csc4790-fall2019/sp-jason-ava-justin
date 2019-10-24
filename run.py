@@ -107,7 +107,6 @@ def apiRequest():
     return json.dumps(graphdata)
 
 #a user would call this API and ask for stock data about a given company for a given month
-#should users have to pass in the company ticker or name?
 @app.route('/api/stockdata/<string:company_ticker>/<int:month>', methods=['GET'])
 def get_Stock_Data(company_ticker, month):
     ticker = company_ticker
@@ -128,8 +127,8 @@ def get_Stock_Data(company_ticker, month):
         temp.append(float(stockdata[key]))
         stockary.append(temp)
 
+    stockary.sort()
 
-    #return jsonify({'Stock': ticker },{'month': month },{'Stockdata':stockary})
     return jsonify({'Stock': ticker,
                     'month': month,
                     'Stockdata': stockary})
