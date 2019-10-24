@@ -59,6 +59,7 @@ def get_title_guardian():
     for items in data['response']['results']:
         print (items['webTitle'])
 
+    logging.warning()
     return data
 
 #eventuall we will not need this
@@ -129,7 +130,9 @@ def get_Stock_Data(company_ticker, month):
 
 
     #return jsonify({'Stock': ticker },{'month': month },{'Stockdata':stockary})
-    return jsonify({'Stock': ticker,'month': month, 'Stockdata': stockary})
+    return jsonify({'Stock': ticker,
+                    'month': month,
+                    'Stockdata': stockary})
 
 
 #a user would call this API and ask for the polarity score for a given company
