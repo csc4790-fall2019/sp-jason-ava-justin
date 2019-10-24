@@ -23,6 +23,7 @@ def get_json(ticker):
     final_url = (url_base.format(ticker,api_key))
     response = requests.get(final_url)
     data = response.json()
+    #logging.warning(data)
     return data
 
 def get_price(month, ticker):
@@ -67,6 +68,7 @@ def home():
     company = "TSLA"
     get_polarity();
     get_title_guardian()
+    get_json(company)
     return render_template('graph.html', stockdata=stockdata, company=company)
 
 stock = {
@@ -85,10 +87,23 @@ stock = {
     ]
 }
 
-#APIs
+# <<<<<<< Updated upstream
+# #APIs
+# =======
+graphdata = {
+    "polScore": .67,
+    "data":[
+            [1,10],
+            [2,11],
+            [3,9]
+        ]
+}
+
+# >>>>>>> Stashed changes
 @app.route('/api/test', methods=['GET'])
 def apiRequest():
-    return json.dumps(stock)
+    # return json.dumps(stock)
+    return json.dumps(graphdata)
 
 #a user would call this API and ask for stock data about a given company for a given month
 #should users have to pass in the company ticker or name?

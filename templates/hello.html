@@ -19,10 +19,22 @@
     <script type="text/jsx">
 
       /*** @jsx React.DOM */
+      var test = "{{testdata}}";
+      console.log(typeof "{{testdata}}");
+      //console.log(typeof {{testdata}});
 
       var realPython = React.createClass({
+          // constructor(props){
+          //   this.state = {
+          //     data: "{{testdata}}"
+          //   }
+          // }
+
         render: function() {
-          return (<h2>Greetings, Python!</h2>);
+          return (<div>
+                    <h2>Greetings, Python!</h2>
+                    <h2>{test}</h2>
+                  </div>);
         }
       });
 
