@@ -72,40 +72,7 @@ def home():
     get_json(company)
     return render_template('graph.html', stockdata=stockdata, company=company)
 
-stock = {
-    "stock": "TSLA",
-    "price": 10.00,
-    "polScore": .67,
-    "stocks": [
-        {
-            'stock': 'TSLA',
-            'price': '10.00'
-        },
-        {
-            'stock': 'FB',
-            'price': '5.00'
-        }
-    ]
-}
-
-# <<<<<<< Updated upstream
-# #APIs
-# =======
-graphdata = {
-    "polScore": .67,
-    "data":[
-            [1,10],
-            [2,11],
-            [3,9]
-        ]
-}
-
-# >>>>>>> Stashed changes
-@app.route('/api/test', methods=['GET'])
-def apiRequest():
-    # return json.dumps(stock)
-    return json.dumps(graphdata)
-
+# APIs
 #a user would call this API and ask for stock data about a given company for a given month
 @app.route('/api/stockdata/<string:company_ticker>/<int:month>', methods=['GET'])
 def get_Stock_Data(company_ticker, month):
@@ -132,7 +99,6 @@ def get_Stock_Data(company_ticker, month):
     return jsonify({'Stock': ticker,
                     'month': month,
                     'Stockdata': stockary})
-
 
 #a user would call this API and ask for the polarity score for a given company
 @app.route('/api/polarity/<string:company_id>', methods=['GET'])
