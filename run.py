@@ -43,6 +43,18 @@ def get_price(month, ticker):
     logging.warning(dictionary)
     return dictionary
 
+#looking into other uses of the alphavantage api
+def monthly_stock_data_json(ticker):
+    api_key = 'DJWUA73FEMJVIPST'
+    url_base = "https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={}&outputsize=full&apikey={}"
+    final_url = (url_base.format(ticker,api_key))
+    response = requests.get(final_url)
+    data = response.json()
+    #logging.warning(data)
+    return data
+
+#we need a method to parse through the data returned by the above method
+
 def get_polarity():
     test_phrase = "Tesla may have more bad news on the horizon analyst: Analyst"
     test_phrase = TextBlob(test_phrase);
@@ -100,13 +112,22 @@ def get_Stock_Data(company_ticker, month):
                     'month': month,
                     'Stockdata': stockary})
 
-#a user would call this API and ask for the polarity score for a given company
-@app.route('/api/polarity/<string:company_id>', methods=['GET'])
-def apiPolarity(company_id):
-    company = company_id
+#a user would call this API and ask for the polarity data for a given company
+#this data will be plotted on the same graph as the stock data
+#we will need to run sentiment analysis on news information from each day. Or at least the same time frame as the stock data, which is every day for a month rn
+@app.route('/api/polarity/<string:company_ticker>', methods=['GET'])
+def apiPolarity(company_ticker):
+    company = company_ticker
 
     if len(company) == 0:
         abort(404)
+
+    #if we are able to get daily news feed on a given month, we could break down the news into a dict, run sentiment on that, save the results, and return that
+    #if we do it monthly, we will need to pass in a month to the @app.route
+    daily_news = {}
+    #daily_news[key] = []
+    daily_news[1] = ['Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst', 'Tesla is not doing well']
+    daily_news[2] = 'Tesla is doing great'
 
     #call future methods to get data about a company then run polarity analysis on it
     test_phrase = "Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst"
