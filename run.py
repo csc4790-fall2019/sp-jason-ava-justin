@@ -113,16 +113,60 @@ def get_Stock_Data(company_ticker, month):
                     'Stockdata': stockary})
 
 #iterate through the dictionary d, and create a new dictionary with its values being the polarity score of the values of d
+#this method just addes the elemnts of d togther, does not take indivudal polarity scores
 def run_sentiment( news_dict ):
     polarity_scores = {}
     for key in news_dict.keys():
+        test_phrase = ''
+        for item in news_dict[key]:
+            test_phrase += item + ' '
+        test_phrase = TextBlob(test_phrase);
+        polarity = test_phrase.sentiment.polarity
+        polarity_scores[key] = polarity
+
+    return( polarity_scores )
+
+#iterates through a dictionary d, for each element of a specific key in d, it runs sentiment analysis on that element,
+#then averages the polarity scores for each element
+def run_avg_sentiment( news_dict ):
+    polarity_scores = {}
+    for key in news_dict.keys():
+        total_polarity = 0.0
         for item in news_dict[key]:
             test_phrase = item
             test_phrase = TextBlob(test_phrase);
             polarity = test_phrase.sentiment.polarity
-            polarity_scores[item] = polarity
+            total_polarity += polarity
+        avg_polarity = total_polarity/(len(news_dict[key]))
+        polarity_scores[key] = avg_polarity
 
     return( polarity_scores )
+
+#some testing i did to see whether taking the average polarity scores was better than adding the strings together
+'''
+test_phrase = 'Tesla is not doing well good good great'
+test_phrase = TextBlob(test_phrase);
+polarity = test_phrase.sentiment.polarity
+print(polarity)
+
+test_phrase = 'Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst'
+test_phrase = TextBlob(test_phrase);
+polarity1 = test_phrase.sentiment.polarity
+print(polarity1)
+
+test_phrase = 'Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst Tesla is not doing well good good great'
+test_phrase = TextBlob(test_phrase);
+polarity2 = test_phrase.sentiment.polarity
+print(polarity2)
+
+test_phrase = 'Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst'
+test_phrase = TextBlob(test_phrase);
+polarity3 = test_phrase.sentiment.polarity
+test_phrase = 'Tesla is not doing well good good great'
+test_phrase = TextBlob(test_phrase);
+polarity3 += test_phrase.sentiment.polarity
+print( polarity3/2 )
+'''
 
 #a user would call this API and ask for the polarity data for a given company
 #this data will be plotted on the same graph as the stock data
@@ -136,12 +180,12 @@ def apiPolarity(company_ticker):
 
     #dictionary that holds 'news feed' for a particular day
     daily_news = {}
-    daily_news[1] = ['Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst', 'Tesla is not doing well']
+    daily_news[1] = ['Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst', 'Tesla is not doing well good good great']
     daily_news[2] = ['Tesla is doing great']
     daily_news[2].append('They suck')
 
     #iterate through the dictionary
-    polarity_scores = run_sentiment( daily_news )
+    polarity_scores = run_avg_sentiment( daily_news )
 
     return jsonify({ 'Stock': company,
                      'Polarity Scores': polarity_scores })
