@@ -40,7 +40,7 @@ def get_price(month, ticker):
         if ((x+1)>=10 and "2019-08-{}".format(x+1) in stocks["Time Series (Daily)"]):
             price = (stocks["Time Series (Daily)"]["2019-08-{}".format(x+1)]["4. close"])
             dictionary["2019-08-{}".format(x+1)] = price
-    logging.warning(dictionary)
+    # logging.warning(dictionary)
     return dictionary
 
 #looking into other uses of the alphavantage api
@@ -75,14 +75,14 @@ def get_title_guardian():
     return data
 
 #eventuall we will not need this
-@app.route('/')
-def home():
-    stockdata = get_price(8, "TSLA")
-    company = "TSLA"
-    get_polarity();
-    get_title_guardian()
-    get_json(company)
-    return render_template('graph.html', stockdata=stockdata, company=company)
+# @app.route('/')
+# def home():
+#     stockdata = get_price(8, "TSLA")
+#     company = "TSLA"
+#     get_polarity();
+#     get_title_guardian()
+#     get_json(company)
+#     return render_template('graph.html', stockdata=stockdata, company=company)
 
 # APIs
 #a user would call this API and ask for stock data about a given company for a given month

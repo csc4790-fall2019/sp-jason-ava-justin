@@ -1,5 +1,6 @@
 import React from 'react';
 import Chart from 'react-google-charts';
+import Button from 'react-bootstrap/Button';
 
 export default class Display extends React.Component{
 
@@ -8,58 +9,87 @@ export default class Display extends React.Component{
     this.state = {
       response: ['null','null'],
       polScore: -999,
-      datapoints: []
+      datapoints: [],
+      ticker: 'TSLA',
+      month: 8
     }
   }
 
-  componentDidMount() {
+  getStockData = () => {
     try{
       (async () => {
-        const response = await fetch('http://127.0.0.1:5000/api/stockdata/TSLA/8',{
+        console.log(this.state.ticker)
+        const response = await fetch('http://127.0.0.1:5000/api/stockdata/'+this.state.ticker+'/8',{
           headers : {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
          }
         });
         const res = await response.json()
+        res.Stockdata.unshift(['x',this.state.ticker])
         console.log(JSON.stringify(res))
-        debugger;
         this.setState({
           response: res.Stockdata,
-          //polScore: res.polScore
         });
         console.log(this.state.response)
       })()
     }catch(err){
       console.log(err)
     }
+  }
 
+  componentDidMount() {
+    this.getStockData();
+  }
 
+  // componentDidUpdate() {
+  //   this.getStockData();
+  // }
+
+  handleTickerSubmit = (event) => {
+    this.getStockData()
+    event.preventDefault();
+  }
+
+  handleChange = (event) => {
+    this.setState({
+      ticker: event.target.value
+    })
   }
 
   render(){
     var data = this.state.response;
-    if(data.length > 1)
-      data.unshift(['x','TSLA'])
-    debugger;
+
     return(
       <div>
-          <Chart
-            width={'600px'}
-            height={'400px'}
-            chartType="LineChart"
-            loader={<div>Loading Chart</div>}
-            data={data}
-            options={{
-              hAxis: {
-                title: 'Date',
-              },
-              vAxis: {
-                title: 'Price',
-              },
-            }}
-            rootProps={{ 'data-testid': '1' }}
-          />
+        <form onSubmit={this.handleTickerSubmit}>
+          <label>
+            Pick a company:
+            <select value={this.state.ticker} onChange={this.handleChange}>
+              <option value="TSLA">Tesla</option>
+              <option value="AAPL">Apple</option>
+              <option value="GOOGL">Google</option>
+              <option value="MSFT">Microsoft</option>
+            </select>
+          </label>
+          <input type="submit" value="Submit" />
+        </form>
+        <Chart
+          width={'600px'}
+          height={'400px'}
+          chartType="LineChart"
+          loader={<div>Loading Chart</div>}
+          data={data}
+          options={{
+            hAxis: {
+              title: 'Date',
+            },
+            vAxis: {
+              title: 'Price',
+            },
+          }}
+          rootProps={{ 'data-testid': '1' }}
+        />
       </div>
     );
   }
