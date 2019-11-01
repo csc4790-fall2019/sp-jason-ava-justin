@@ -112,6 +112,18 @@ def get_Stock_Data(company_ticker, month):
                     'month': month,
                     'Stockdata': stockary})
 
+#iterate through the dictionary d, and create a new dictionary with its values being the polarity score of the values of d
+def run_sentiment( news_dict ):
+    polarity_scores = {}
+    for key in news_dict.keys():
+        for item in news_dict[key]:
+            test_phrase = item
+            test_phrase = TextBlob(test_phrase);
+            polarity = test_phrase.sentiment.polarity
+            polarity_scores[item] = polarity
+
+    return( polarity_scores )
+
 #a user would call this API and ask for the polarity data for a given company
 #this data will be plotted on the same graph as the stock data
 #we will need to run sentiment analysis on news information from each day. Or at least the same time frame as the stock data, which is every day for a month rn
@@ -122,19 +134,17 @@ def apiPolarity(company_ticker):
     if len(company) == 0:
         abort(404)
 
-    #if we are able to get daily news feed on a given month, we could break down the news into a dict, run sentiment on that, save the results, and return that
-    #if we do it monthly, we will need to pass in a month to the @app.route
+    #dictionary that holds 'news feed' for a particular day
     daily_news = {}
-    #daily_news[key] = []
     daily_news[1] = ['Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst', 'Tesla is not doing well']
-    daily_news[2] = 'Tesla is doing great'
+    daily_news[2] = ['Tesla is doing great']
+    daily_news[2].append('They suck')
 
-    #call future methods to get data about a company then run polarity analysis on it
-    test_phrase = "Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst"
-    test_phrase = TextBlob(test_phrase);
-    polarity = test_phrase.sentiment.polarity
+    #iterate through the dictionary
+    polarity_scores = run_sentiment( daily_news )
 
-    return jsonify({'Polarity Score': polarity })
+    return jsonify({ 'Stock': company,
+                     'Polarity Scores': polarity_scores })
 
 @app.errorhandler(404)
 def not_found(error):
