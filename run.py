@@ -53,8 +53,6 @@ def monthly_stock_data_json(ticker):
     #logging.warning(data)
     return data
 
-#we need a method to parse through the data returned by the above method
-
 def get_polarity():
     test_phrase = "Tesla may have more bad news on the horizon analyst: Analyst"
     test_phrase = TextBlob(test_phrase);
@@ -73,6 +71,28 @@ def get_title_guardian():
 
     logging.warning()
     return data
+
+def news_api(ticker):
+    api_key = '9d9f82a5686443d19a2116e137024848'
+
+    #q - Keywords or a phrase to search for.
+    #qInTitle - Keywords or phrases to search for in the article title only.
+    url_base = ( 'https://newsapi.org/v2/everything?'
+                 'q=Tesla&'
+                 'qInTitle=Tesla&'
+                 'from=2019-10-08&'
+                 'to=2019-11-08'
+                 'sortBy=popularity&'
+                 'language=en&'
+                 'apiKey={}' )
+
+    final_url = (url_base.format(api_key))
+
+    response = requests.get(final_url)
+    f= open("test.txt","w+")
+    json.dump(response.json(), f)
+
+#news_api('TLSA')
 
 #eventuall we will not need this
 # @app.route('/')
@@ -112,20 +132,6 @@ def get_Stock_Data(company_ticker, month):
                     'month': month,
                     'Stockdata': stockary})
 
-#iterate through the dictionary d, and create a new dictionary with its values being the polarity score of the values of d
-#this method just addes the elemnts of d togther, does not take indivudal polarity scores
-def run_sentiment( news_dict ):
-    polarity_scores = {}
-    for key in news_dict.keys():
-        test_phrase = ''
-        for item in news_dict[key]:
-            test_phrase += item + ' '
-        test_phrase = TextBlob(test_phrase);
-        polarity = test_phrase.sentiment.polarity
-        polarity_scores[key] = polarity
-
-    return( polarity_scores )
-
 #iterates through a dictionary d, for each element of a specific key in d, it runs sentiment analysis on that element,
 #then averages the polarity scores for each element
 def run_avg_sentiment( news_dict ):
@@ -142,32 +148,6 @@ def run_avg_sentiment( news_dict ):
 
     return( polarity_scores )
 
-#some testing i did to see whether taking the average polarity scores was better than adding the strings together
-'''
-test_phrase = 'Tesla is not doing well good good great'
-test_phrase = TextBlob(test_phrase);
-polarity = test_phrase.sentiment.polarity
-print(polarity)
-
-test_phrase = 'Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst'
-test_phrase = TextBlob(test_phrase);
-polarity1 = test_phrase.sentiment.polarity
-print(polarity1)
-
-test_phrase = 'Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst Tesla is not doing well good good great'
-test_phrase = TextBlob(test_phrase);
-polarity2 = test_phrase.sentiment.polarity
-print(polarity2)
-
-test_phrase = 'Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst'
-test_phrase = TextBlob(test_phrase);
-polarity3 = test_phrase.sentiment.polarity
-test_phrase = 'Tesla is not doing well good good great'
-test_phrase = TextBlob(test_phrase);
-polarity3 += test_phrase.sentiment.polarity
-print( polarity3/2 )
-'''
-
 #a user would call this API and ask for the polarity data for a given company
 #this data will be plotted on the same graph as the stock data
 #we will need to run sentiment analysis on news information from each day. Or at least the same time frame as the stock data, which is every day for a month rn
@@ -177,6 +157,8 @@ def apiPolarity(company_ticker):
 
     if len(company) == 0:
         abort(404)
+
+    #gather news feed about a company and store that data month by month or day by day into a dict
 
     #dictionary that holds 'news feed' for a particular day
     daily_news = {}
