@@ -86,16 +86,22 @@ def get_title_guardian():
             guardian_date = guardian_date_time.date()  #datetime --> date object
             guardian_date = guardian_date.strftime("%b %d, %Y") #date object --> string (optional for now)
             title = items['webTitle']
-            if 'Facebook' in title:
-                print(title)
+            # print(title)
 
-            guardian_dictionary.update( { guardian_date : title} ) #date string, title
+            if guardian_date not in guardian_dictionary:
+                guardian_dictionary[guardian_date] = []
+
+            if 'Facebook' in title and title not in guardian_dictionary[guardian_date]:
+                guardian_dictionary[guardian_date].append(title)
 
         #Format of keys: Example guardian_dictionary['October 25, 2019'])
-        for key, value in guardian_dictionary.items():
-            print (key, value)
-
         page_counter += 1
+
+    for date in sorted(guardian_dictionary):
+        print '---'
+        print date
+        for title in guardian_dictionary[date]:
+            print title
 
     return guardian_dictionary
 
