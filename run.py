@@ -204,13 +204,10 @@ def apiPolarity(company_ticker):
     #look up ticker in the dictionary
 
     #gather news feed about a company and store that data month by month or day by day into a dict
-    get_title_guardian('Facebook', '2019-10-01', '2019-10-01' )
 
     #dictionary that holds 'news feed' for a particular day
-    daily_news = {}
-    daily_news[1] = ['Tesla may have more bad news on the horizon bad terrible awful analyst: Analyst', 'Tesla is not doing well good good great']
-    daily_news[2] = ['Tesla is doing great']
-    daily_news[2].append('They suck')
+    daily_news = get_title_guardian('Facebook', '2019-10-01', '2019-10-25' )
+    print(daily_news)
 
     #iterate through the dictionary
     polarity_scores = run_avg_sentiment( daily_news )
