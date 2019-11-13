@@ -192,29 +192,38 @@ def run_avg_sentiment( news_dict ):
 
     return( polarity_scores )
 
+tickers = {'TSLA': 'Tesla',
+           'AAPL': 'Apple',
+           'GOOGL': 'Google',
+           'MSFT': 'Microsoft',
+           'FB' : 'Facebook', }
+
 #a user would call this API and ask for the polarity data for a given company
 #this data will be plotted on the same graph as the stock data
 #we will need to run sentiment analysis on news information from each day. Or at least the same time frame as the stock data, which is every day for a month rn
 @app.route('/api/polarity/<string:company_ticker>', methods=['GET'])
 def apiPolarity(company_ticker):
-    company = company_ticker
+    ticker = company_ticker
+    company = ''
+    start_date = startDate
+    end_date = endDate
 
-    if len(company) == 0:
+    if len(ticker) == 0:
         abort(404)
 
     #look up ticker in the dictionary
+    for key in tickers.keys():
+        if ticker == key:
+            company = tickers[key]
 
-    #gather news feed about a company and store that data month by month or day by day into a dict
+    if  len(company)== 0:
+        abort(404)
 
-    #dictionary that holds 'news feed' for a particular day
-    daily_news = get_title_guardian('Facebook', '2019-10-01', '2019-10-25' )
-    print(daily_news)
-
-    #iterate through the dictionary
+    daily_news = get_title_guardian(company, '2019-10-01', '2019-10-25' )
     polarity_scores = run_avg_sentiment( daily_news )
 
     return jsonify({ 'Stock': company,
-                     'Polarity Scores': polarity_scores })  #should we add dates to this later???
+                     'Polarity Scores': polarity_scores })
 
 @app.errorhandler(404)
 def not_found(error):
