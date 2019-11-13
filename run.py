@@ -92,11 +92,12 @@ def get_title_guardian(company, startDate, endDate):
             title = items['webTitle']
             # print(title)
 
-            if guardian_date not in guardian_dictionary:
-                guardian_dictionary[guardian_date] = []
+            if company in title:
+                if guardian_date not in guardian_dictionary:
+                    guardian_dictionary[guardian_date] = []
 
-            if company in title and title not in guardian_dictionary[guardian_date]:
-                guardian_dictionary[guardian_date].append(title)
+                if title not in guardian_dictionary[guardian_date]:
+                    guardian_dictionary[guardian_date].append(title)
 
         #Format of keys: Example guardian_dictionary['October 25, 2019'])
         page_counter += 1
