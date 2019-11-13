@@ -106,30 +106,38 @@ def get_title_guardian():
     return guardian_dictionary
 
 
-get_title_guardian()
+#get_title_guardian()
 
 
-def news_api(ticker):
+def news_api(ticker, startDate, endDate):
     api_key = '9d9f82a5686443d19a2116e137024848'
+    company = ticker
+    start_date = startDate
+    end_date = endDate
+
+    print(company)
+    print(start_date)
+    print(end_date)
 
     #q - Keywords or a phrase to search for.
     #qInTitle - Keywords or phrases to search for in the article title only.
     url_base = ( 'https://newsapi.org/v2/everything?'
-                 'q=Tesla&'
-                 'qInTitle=Tesla&'
-                 'from=2019-10-08&'
-                 'to=2019-11-08'
+                 'q={}&'
+                 'qInTitle={}&'
+                 'from=2019-10-13&'
+                 'to=2019-11-21'
                  'sortBy=popularity&'
                  'language=en&'
                  'apiKey={}' )
 
-    final_url = (url_base.format(api_key))
+    final_url = (url_base.format(company, company, api_key))
+    print(final_url)
 
     response = requests.get(final_url)
     f= open("test.txt","w+")
     json.dump(response.json(), f)
 
-#news_api('TLSA')
+news_api('TLSA', '2019-10-08', '2019-11-08' )
 
 #eventuall we will not need this
 # @app.route('/')
