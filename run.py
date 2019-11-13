@@ -5,6 +5,8 @@ import re
 import logging
 import json
 import calendar
+import datetime as dt
+from datetime import datetime
 
 #from flask.ext.cors import CORS, cross_origin
 from flask_cors import CORS, cross_origin
@@ -40,7 +42,7 @@ def get_price(month, ticker):
         if ((x+1)>=10 and "2019-08-{}".format(x+1) in stocks["Time Series (Daily)"]):
             price = (stocks["Time Series (Daily)"]["2019-08-{}".format(x+1)]["4. close"])
             dictionary["2019-08-{}".format(x+1)] = price
-    # logging.warning(dictionary)
+
     return dictionary
 
 #looking into other uses of the alphavantage api
@@ -59,18 +61,47 @@ def get_polarity():
     print("Polarity Score:")
     print(test_phrase.sentiment.polarity);
 
+
 def get_title_guardian():
     api_key = '0c02b6f1-c863-430b-99c2-568f0ab32aa9'
-    url_base = "https://content.guardianapis.com/search?q=Facebook&from-date=2019-01-01&api-key={}"
-    final_url = (url_base.format(api_key))
+    url_base = "https://content.guardianapis.com/search?q=Facebook&from-date=2019-10-01&page={}&api-key={}"
+
+    final_url = (url_base.format(1, api_key))
     response = requests.get(final_url)
     data = response.json()
 
-    for items in data['response']['results']:
-        print (items['webTitle'])
+    total_pages = int(data['response']['pages'])
+    #total_pages = 1  #TEMPORARY, USE THE ONE ABOVE
 
-    logging.warning()
-    return data
+    page_counter = 1
+    guardian_dictionary = {} #key = date string, value = title
+
+    while page_counter <= total_pages:
+        final_url = (url_base.format(page_counter, api_key))
+        response = requests.get(final_url)
+        data = response.json()
+
+        for items in data['response']['results']:
+            guardian_date_time = datetime.strptime(items['webPublicationDate'], "%Y-%m-%dT%H:%M:%SZ") # unicode --> datetime object
+            guardian_date = guardian_date_time.date()  #datetime --> date object
+            guardian_date = guardian_date.strftime("%b %d, %Y") #date object --> string (optional for now)
+            title = items['webTitle']
+            if 'Facebook' in title:
+                print(title)
+
+            guardian_dictionary.update( { guardian_date : title} ) #date string, title
+
+        #Format of keys: Example guardian_dictionary['October 25, 2019'])
+        for key, value in guardian_dictionary.items():
+            print (key, value)
+
+        page_counter += 1
+
+    return guardian_dictionary
+
+
+get_title_guardian()
+
 
 def news_api(ticker):
     api_key = '9d9f82a5686443d19a2116e137024848'
@@ -170,7 +201,7 @@ def apiPolarity(company_ticker):
     polarity_scores = run_avg_sentiment( daily_news )
 
     return jsonify({ 'Stock': company,
-                     'Polarity Scores': polarity_scores })
+                     'Polarity Scores': polarity_scores })  #should we add dates to this later???
 
 @app.errorhandler(404)
 def not_found(error):
