@@ -62,11 +62,15 @@ def get_polarity():
     print(test_phrase.sentiment.polarity);
 
 
-def get_title_guardian():
+def get_title_guardian(company, startDate, endDate):
     api_key = '0c02b6f1-c863-430b-99c2-568f0ab32aa9'
-    url_base = "https://content.guardianapis.com/search?q=Facebook&from-date=2019-10-01&page={}&api-key={}"
+    company = company
+    start_date = startDate
+    end_date = endDate
 
-    final_url = (url_base.format(1, api_key))
+    url_base = "https://content.guardianapis.com/search?q={}&from-date={}&to-date={}&page={}&api-key={}"
+
+    final_url = (url_base.format(company, start_date, end_date, 1, api_key))
     response = requests.get(final_url)
     data = response.json()
 
@@ -77,7 +81,7 @@ def get_title_guardian():
     guardian_dictionary = {} #key = date string, value = title
 
     while page_counter <= total_pages:
-        final_url = (url_base.format(page_counter, api_key))
+        final_url = (url_base.format(company, start_date, end_date, page_counter, api_key))
         response = requests.get(final_url)
         data = response.json()
 
@@ -91,7 +95,7 @@ def get_title_guardian():
             if guardian_date not in guardian_dictionary:
                 guardian_dictionary[guardian_date] = []
 
-            if 'Facebook' in title and title not in guardian_dictionary[guardian_date]:
+            if company in title and title not in guardian_dictionary[guardian_date]:
                 guardian_dictionary[guardian_date].append(title)
 
         #Format of keys: Example guardian_dictionary['October 25, 2019'])
@@ -106,9 +110,6 @@ def get_title_guardian():
     '''
 
     return guardian_dictionary
-
-
-#get_title_guardian()
 
 #only works for queries within the past 2 months wtffffffff
 def news_api(ticker, startDate, endDate):
@@ -200,7 +201,10 @@ def apiPolarity(company_ticker):
     if len(company) == 0:
         abort(404)
 
+    #look up ticker in the dictionary
+
     #gather news feed about a company and store that data month by month or day by day into a dict
+    get_title_guardian('Facebook', '2019-10-01', '2019-10-01' )
 
     #dictionary that holds 'news feed' for a particular day
     daily_news = {}
