@@ -88,7 +88,7 @@ def get_title_guardian(company, startDate, endDate):
         for items in data['response']['results']:
             guardian_date_time = datetime.strptime(items['webPublicationDate'], "%Y-%m-%dT%H:%M:%SZ") # unicode --> datetime object
             guardian_date = guardian_date_time.date()  #datetime --> date object
-            guardian_date = guardian_date.strftime("%b %d, %Y") #date object --> string (optional for now)
+            guardian_date = guardian_date.strftime("%Y-%m-%d") #date object --> string (optional for now)
             title = items['webTitle']
             # print(title)
 
@@ -138,17 +138,6 @@ def news_api(ticker, startDate, endDate):
 
 #news_api('Telsa', '2019-10-13', '2019-11-08' )
 
-#eventuall we will not need this
-# @app.route('/')
-# def home():
-#     stockdata = get_price(8, "TSLA")
-#     company = "TSLA"
-#     get_polarity();
-#     get_title_guardian()
-#     get_json(company)
-#     return render_template('graph.html', stockdata=stockdata, company=company)
-
-# APIs
 #a user would call this API and ask for stock data about a given company for a given month
 @app.route('/api/stockdata/<string:company_ticker>/<int:month>', methods=['GET'])
 def get_Stock_Data(company_ticker, month):
@@ -192,6 +181,13 @@ def run_avg_sentiment( news_dict ):
 
     return( polarity_scores )
 
+#validates a date format
+def validate(date_text):
+    try:
+        datetime.strptime(date_text, '%Y-%m-%d')
+    except:
+        abort(403)
+
 tickers = {'TSLA': 'Tesla',
            'AAPL': 'Apple',
            'GOOGL': 'Google',
@@ -200,34 +196,51 @@ tickers = {'TSLA': 'Tesla',
 
 #a user would call this API and ask for the polarity data for a given company
 #this data will be plotted on the same graph as the stock data
-#we will need to run sentiment analysis on news information from each day. Or at least the same time frame as the stock data, which is every day for a month rn
-@app.route('/api/polarity/<string:company_ticker>', methods=['GET'])
-def apiPolarity(company_ticker):
+@app.route('/api/polarity/<string:company_ticker>/<string:startDate>/<string:endDate>', methods=['GET'])
+def apiPolarity(company_ticker,startDate,endDate):
     ticker = company_ticker
     company = ''
-    #start_date = startDate
-    #end_date = endDate
+    start_date = startDate
+    end_date = endDate
 
     if len(ticker) == 0:
         abort(404)
+
+    #make sure the date formats are valid
+    validate(start_date)
+    validate(end_date)
 
     #look up ticker in the dictionary
     for key in tickers.keys():
         if ticker == key:
             company = tickers[key]
 
-    if  len(company) == 0:
+    #company did not exist in ticker dict
+    if len(company) == 0:
         abort(400)
 
-    daily_news = get_title_guardian(company, '2019-10-01', '2019-10-31' )
+    daily_news = get_title_guardian(company, start_date, end_date )
     polarity_scores = run_avg_sentiment( daily_news )
 
+    polarity = []
+    for key in polarity_scores:
+        temp = []
+        temp.append(key)
+        temp.append(float(polarity_scores[key]))
+        polarity.append(temp)
+
+    polarity.sort()
+
     return jsonify({ 'Stock': company,
-                     'Polarity Scores': polarity_scores })
+                     'Polarity Scores': polarity })
 
 @app.errorhandler(400)
 def bad_request(error):
-    return make_response(jsonify({'error': 'Bad Request'}), 400)
+    return make_response(jsonify({'error': 'Invalid Ticker'}), 400)
+
+@app.errorhandler(403)
+def bad_request(error):
+    return make_response(jsonify({'error': 'Incorrect Date Format'}), 403)
 
 @app.errorhandler(404)
 def not_found(error):
