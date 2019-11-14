@@ -205,8 +205,8 @@ tickers = {'TSLA': 'Tesla',
 def apiPolarity(company_ticker):
     ticker = company_ticker
     company = ''
-    start_date = startDate
-    end_date = endDate
+    #start_date = startDate
+    #end_date = endDate
 
     if len(ticker) == 0:
         abort(404)
@@ -216,14 +216,18 @@ def apiPolarity(company_ticker):
         if ticker == key:
             company = tickers[key]
 
-    if  len(company)== 0:
-        abort(404)
+    if  len(company) == 0:
+        abort(400)
 
-    daily_news = get_title_guardian(company, '2019-10-01', '2019-10-25' )
+    daily_news = get_title_guardian(company, '2019-10-01', '2019-10-31' )
     polarity_scores = run_avg_sentiment( daily_news )
 
     return jsonify({ 'Stock': company,
                      'Polarity Scores': polarity_scores })
+
+@app.errorhandler(400)
+def bad_request(error):
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
 
 @app.errorhandler(404)
 def not_found(error):
