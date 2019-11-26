@@ -232,7 +232,7 @@ def apiPolarity(company_ticker,startDate,endDate):
     polarity.sort()
 
     return jsonify({ 'Stock': company,
-                     'Polarity Scores': polarity })
+                     'PolarityScores': polarity })
 
 @app.errorhandler(400)
 def bad_request(error):
