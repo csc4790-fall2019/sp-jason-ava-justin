@@ -112,7 +112,7 @@ def get_title_guardian(company, startDate, endDate):
 
     return guardian_dictionary
 
-#only works for queries within the past 2 months wtffffffff
+#only works for queries within the past 2 months
 def news_api(ticker, startDate, endDate):
     api_key = '9d9f82a5686443d19a2116e137024848'
     company = ticker
@@ -218,6 +218,8 @@ def apiPolarity(company_ticker,startDate,endDate):
     #company did not exist in ticker dict
     if len(company) == 0:
         abort(400)
+
+    #add database retrival stuff here
 
     daily_news = get_title_guardian(company, start_date, end_date )
     polarity_scores = run_avg_sentiment( daily_news )

@@ -2,39 +2,61 @@ from __future__ import print_function # Python 2/3 compatibility
 import boto3
 import json
 import decimal
+from boto3.dynamodb.conditions import Key, Attr
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 table = dynamodb.Table('Polarity-Scores')
 
-company = 'Tesla'
-ticker = 'TSLA'
-polarity = '0.5'
-date = '2019-11-29'
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            if o % 1 > 0:
+                return float(o)
+            else:
+                return int(o)
+        return super(DecimalEncoder, self).default(o)
 
-'''
-response = table.put_item(
-   Item={
-        'company': company,
-        'ticker': ticker,
-        'polarity_score': polarity,
-        'last_capture_date': date,
-    }
-)
-'''
+#data from a call for Google polarity scores from 2018-11-01 to 2019-11-01
+scores = [["2018-11-01",0.125],["2018-11-02", 0.25],["2018-11-08", 0.25],["2018-11-11", 0.0],["2018-11-14", 0.04545454545454545],["2018-11-18", 0.0],["2018-11-20", 0.0],["2018-11-22",-0.1375],["2018-11-24",0.0],["2018-11-27",0.21666666666666665],["2018-11-29",0.0],["2018-12-02",0.0],["2018-12-04",0.2],["2018-12-10",0.0],["2018-12-11",0.0],["2018-12-12",0.25],["2018-12-13",-0.07765151515151517],["2018-12-19",0.13636363636363635],["2018-12-20",0.0],["2019-01-10",0.14285714285714285],["2019-01-11",0.25],["2019-01-21",0.0],["2019-01-23",0.0],["2019-01-31",0.0],["2019-02-01",0.0],["2019-02-05",0.0],["2019-02-10",0.0],["2019-02-19",0.14285714285714285],["2019-02-21",0.125],["2019-02-22",0.0],["2019-03-06",0.0],["2019-03-08",0.0],["2019-03-09",0.125],["2019-03-10",0.2857142857142857],["2019-03-11",0.25],["2019-03-12",-0.00833333333333334],["2019-03-13",0.0],["2019-03-16",0.0],["2019-03-19",0.13636363636363635],["2019-03-20",-0.125],["2019-03-27",0.0],["2019-04-01",0.0],["2019-04-02",0.0],["2019-04-03",-0.15],["2019-04-05",0.0],["2019-04-09",0.3],["2019-04-17",-0.05],["2019-04-20",0.1],["2019-04-22",0.0],["2019-04-23",-0.1],["2019-04-26",-0.15555555555555559],["2019-04-27",0.0],["2019-04-28",0.10714285714285714],["2019-04-30",0.0],["2019-05-07",0.05357142857142857],["2019-05-10",0.0],["2019-05-13",0.4],["2019-05-14",0.0],["2019-05-17",0.0],["2019-05-20",0.2333333333333333],["2019-05-21",0.0],["2019-05-22",0.0],["2019-06-03",0.0],["2019-06-04",0.0],["2019-06-06",-0.4],["2019-06-07",0.10000000000000002],["2019-06-10",0.0],["2019-06-18",0.0],["2019-06-24",0.3416666666666666],["2019-06-25",0.0],["2019-06-27",-0.049999999999999996],["2019-06-28",0.06818181818181818],["2019-07-02",-0.25],["2019-07-03",0.06818181818181818],["2019-07-04",0.0],["2019-07-11",0.0],["2019-07-13",0.2],["2019-07-15",-0.03181818181818183],["2019-07-16",0.0],["2019-07-17",0.0],["2019-07-22",-0.1],["2019-07-25",0.0],["2019-07-26",0.0],["2019-08-06",-0.16666666666666666],["2019-08-07",0.0],["2019-08-12",0.0],["2019-08-16",0.0],["2019-08-19",0.0],["2019-08-23",0.5],["2019-08-27",0.0],["2019-08-31",0.13636363636363635],["2019-09-04",0.0],["2019-09-06",0.0],["2019-09-11",-0.14285714285714285],["2019-09-12",-0.25],["2019-09-13",0.0],["2019-09-15",0.0],["2019-09-19",-0.30000000000000004],["2019-09-20",0.0],["2019-09-23",0.0],["2019-09-24",0.0],["2019-10-03",-0.075],["2019-10-06",0.0],["2019-10-11",0.07142857142857142],["2019-10-15",0.0],["2019-10-16",0.0],["2019-10-21",0.35],["2019-10-23",0.0],["2019-10-29",0.03333333333333333],["2019-10-31",0.2125],["2019-11-01",0.0]]
 
-response = table.get_item(
-    Key={
-        'company': 'Tesla',
-    }
-)
+
+# for item in scores:
+#     temp = str(item[1])
+#     response = table.put_item(
+#         Item={
+#             'company' : 'Google',
+#             'date': item[0],
+#             'ticker' : 'GOOGL',
+#             'polarity_score' : temp,
+#         }
+#     )
+#     print(response)
+
+# response = table.scan()
+#
+# for i in response['Items']:
+#     print(json.dumps(i, cls=DecimalEncoder))
+
+# print('Data from Google')
+#
+# response = table.get_item(Key={'company': 'Google'})
+# print(response)
+
+#
+# response = table.query(
+#     KeyConditionExpression=Key('company').eq('Google')
+# )
+#
+# for i in response['Items']:
+#     print(i['company'], ":", i['date'], ':', i['polarity_score'])
+
+print("Polarity Scores from April and Company is Google")
 
 response = table.query(
-    ProjectionExpression="#yr, title, info.genres, info.actors[0]",
-    ExpressionAttributeNames={ "#yr": "year" }, # Expression Attribute Names for Projection Expression only.
-    KeyConditionExpression=Key('year').eq(1992) & Key('title').between('A', 'L')
+    ProjectionExpression="#date, company, polarity_score",
+    ExpressionAttributeNames={ "#date": "date" }, # Expression Attribute Names for Projection Expression only.
+    KeyConditionExpression=Key('company').eq('Google') & Key('date').between('2019-04-01', '2019-04-30')
 )
 
 for i in response[u'Items']:
     print(json.dumps(i, cls=DecimalEncoder))
-
-print(response)

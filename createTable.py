@@ -1,24 +1,31 @@
-#I ran this script to create the database 
-
+from __future__ import print_function # Python 2/3 compatibility
 import boto3
 
-# Get the service resource.
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 
-# Create the DynamoDB table.
+
 table = dynamodb.create_table(
     TableName='Polarity-Scores',
     KeySchema=[
         {
-            'AttributeName': 'Company',
+            'AttributeName': 'company',
             'KeyType': 'HASH'  #Partition key
         },
+        {
+            'AttributeName': 'date',
+            'KeyType': 'RANGE'  #Sort key
+        }
     ],
     AttributeDefinitions=[
         {
             'AttributeName': 'company',
             'AttributeType': 'S'
         },
+        {
+            'AttributeName': 'date',
+            'AttributeType': 'S'
+        },
+
     ],
     ProvisionedThroughput={
         'ReadCapacityUnits': 10,
