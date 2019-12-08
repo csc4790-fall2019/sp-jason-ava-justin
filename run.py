@@ -1,3 +1,4 @@
+from __future__ import print_function # Python 2/3 compatibility
 from flask import Flask, request, render_template, jsonify, abort, make_response, request, url_for
 from textblob import TextBlob
 import requests
@@ -10,6 +11,23 @@ from datetime import datetime
 
 #from flask.ext.cors import CORS, cross_origin
 from flask_cors import CORS, cross_origin
+
+#DB imports
+import boto3
+import decimal
+from boto3.dynamodb.conditions import Key, Attr
+
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+table = dynamodb.Table('Polarity-Scores')
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            if o % 1 > 0:
+                return float(o)
+            else:
+                return int(o)
+        return super(DecimalEncoder, self).default(o)
 
 app = Flask(__name__, template_folder='templates/')
 CORS(app)
@@ -196,7 +214,7 @@ tickers = {'TSLA': 'Tesla',
 
 #a user would call this API and ask for the polarity data for a given company
 #this data will be plotted on the same graph as the stock data
-@app.route('/api/polarity/<string:company_ticker>/<string:startDate>/<string:endDate>', methods=['GET'])
+@app.route('/api/polarity/v1/<string:company_ticker>/<string:startDate>/<string:endDate>', methods=['GET'])
 def apiPolarity(company_ticker,startDate,endDate):
     ticker = company_ticker
     company = ''
@@ -219,8 +237,6 @@ def apiPolarity(company_ticker,startDate,endDate):
     if len(company) == 0:
         abort(400)
 
-    #add database retrival stuff here
-
     daily_news = get_title_guardian(company, start_date, end_date )
     polarity_scores = run_avg_sentiment( daily_news )
 
@@ -229,6 +245,48 @@ def apiPolarity(company_ticker,startDate,endDate):
         temp = []
         temp.append(key)
         temp.append(float(polarity_scores[key]))
+        polarity.append(temp)
+
+    polarity.sort()
+
+    return jsonify({ 'Stock': company,
+                     'PolarityScores': polarity })
+
+#a user would call this API and ask for the polarity data for a given company
+#this data will be plotted on the same graph as the stock data
+#version2 queries the database!
+@app.route('/api/polarity/v2/<string:company_ticker>/<string:startDate>/<string:endDate>', methods=['GET'])
+def apiPolarityV2(company_ticker,startDate,endDate):
+    ticker = company_ticker
+    company = ''
+    start_date = startDate
+    end_date = endDate
+
+    if len(ticker) == 0:
+        abort(404)
+
+    #make sure the date formats are valid
+    validate(start_date)
+    validate(end_date)
+
+    #look up ticker in the dictionary
+    for key in tickers.keys():
+        if ticker == key:
+            company = tickers[key]
+
+    #company did not exist in ticker dict
+    if len(company) == 0:
+        abort(400)
+
+    response = table.query(
+        ProjectionExpression="#date, company, polarity_score",
+        ExpressionAttributeNames={ "#date": "date" }, # Expression Attribute Names for Projection Expression only.
+        KeyConditionExpression=Key('company').eq(company) & Key('date').between(start_date, end_date)
+    )
+
+    polarity = []
+    for i in response['Items']:
+        temp = (i['date'], float(i['polarity_score']))
         polarity.append(temp)
 
     polarity.sort()
