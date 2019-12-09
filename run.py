@@ -154,8 +154,6 @@ def news_api(ticker, startDate, endDate):
     f= open("test.txt","w+")
     json.dump(response.json(), f)
 
-#news_api('Telsa', '2019-10-13', '2019-11-08' )
-
 #a user would call this API and ask for stock data about a given company for a given month
 @app.route('/api/stockdata/<string:company_ticker>/<int:month>', methods=['GET'])
 def get_Stock_Data(company_ticker, month):
