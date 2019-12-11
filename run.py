@@ -66,6 +66,7 @@ def get_price(month, ticker):
 
     ########JASON GET STOCK DATA
 def yearly_stock_data_json(ticker, year='2019'):
+    year = str(year)
     api_key = 'DJWUA73FEMJVIPST'
     url_base = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={}&outputsize=full&apikey={}"
     final_url = (url_base.format(ticker,api_key))
@@ -140,18 +141,18 @@ def get_title_guardian(company, startDate, endDate):
     return guardian_dictionary
 
 #a user would call this API and ask for stock data about a given company for a given month
-@app.route('/api/stockdata/<string:company_ticker>/<int:month>', methods=['GET'])
-def get_Stock_Data(company_ticker, month):
+@app.route('/api/stockdata/<string:company_ticker>/<int:year>', methods=['GET'])
+def get_Stock_Data(company_ticker, year):
     ticker = company_ticker
-    month = month
+    # month = month
 
     if len(ticker) == 0:
         abort(404)
-    if not month in range(1,13):
-        abort(404)
+    # if not year in range(1,13):
+    #     abort(404)
 
     # stockdata = get_price(month, ticker)
-    stockdata = yearly_stock_data_json(ticker) #going to need to add year here
+    stockdata = yearly_stock_data_json(ticker, year) #going to need to add year here
     jsonify(stockdata)
 
     stockary = []
@@ -164,7 +165,7 @@ def get_Stock_Data(company_ticker, month):
     stockary.sort()
 
     return jsonify({'Stock': ticker,
-                    'month': month,
+                    'year': year,
                     'Stockdata': stockary})
 
 #iterates through a dictionary d, for each element of a specific key in d, it runs sentiment analysis on that element,

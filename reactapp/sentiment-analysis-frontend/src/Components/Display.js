@@ -19,6 +19,7 @@ export default class Display extends React.Component{
       datapoints: [],
       ticker: 'TSLA',
       month: 8,
+      year: 2019,
       lowstock:99999,
       highstock:-99999
     }
@@ -27,7 +28,7 @@ export default class Display extends React.Component{
   getStockData = () => {
     try{
       (async () => {
-        const stockresponse = await fetch('http://127.0.0.1:5000/api/stockdata/'+this.state.ticker+'/8',{
+        const stockresponse = await fetch('http://127.0.0.1:5000/api/stockdata/'+this.state.ticker+'/'+this.state.year,{
           headers : {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -41,7 +42,7 @@ export default class Display extends React.Component{
         //   }
         // });
 
-        const polarityresponse = await fetch('http://127.0.0.1:5000/api/polarity/v2/'+this.state.ticker+'/2019-01-01/2019-12-20',{
+        const polarityresponse = await fetch('http://127.0.0.1:5000/api/polarity/v2/'+this.state.ticker+'/'+this.state.year+'-01-01/'+this.state.year+'-12-20',{
           headers : {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -139,6 +140,12 @@ export default class Display extends React.Component{
     })
   }
 
+  handleYearChange = (event) => {
+    this.setState({
+      year: event.target.value
+    })
+  }
+
   render(){
     var data = this.state.graphdata;
 
@@ -158,15 +165,14 @@ export default class Display extends React.Component{
               Sentiment Analysis vs. Equity Price History
             </Heading>
           </Card>
-
           <Card
             sx = {{
               my: 3
             }}>
             <form onSubmit={this.handleTickerSubmit}>
-              <label>
+              <label style = {{margin: '10px'}}>
                 Pick a company:
-                <select value={this.state.ticker} onChange={this.handleChange}>
+                <select style = {{margin: '5px'}} value={this.state.ticker} onChange={this.handleChange}>
                   <option value="TSLA">Tesla</option>
                   <option value="AAPL">Apple</option>
                   <option value="GOOGL">Google</option>
@@ -174,7 +180,14 @@ export default class Display extends React.Component{
                   <option value="FB">Facebook</option>
                 </select>
               </label>
-              <input type="submit" value="Submit" />
+              <label style = {{margin: '10px'}}>
+                   Pick a year:
+                <select style = {{margin: '5px'}} value={this.state.year} onChange={this.handleYearChange}>
+                  <option value="2019">2019</option>
+                  <option value="2018">2018</option>
+                </select>
+              </label>
+              <input style = {{margin: '10px'}} type="submit" value="Submit" />
             </form>
           </Card>
           <Card
