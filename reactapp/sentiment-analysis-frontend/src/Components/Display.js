@@ -86,12 +86,18 @@ export default class Display extends React.Component{
         var graphdata = [];
         set.forEach((entry) => {graphdata.push([entry,0,0])})
 
+        console.log(stockmap.get('2019-01-27'))
+
+        graphdata.sort()
         graphdata.forEach((point, index) => {
+
           // debugger
           if(stockmap.get(point[0]) !== undefined)
             point[1] = stockmap.get(point[0])
           else{
-            point[1] = stockmap.get(graphdata[index-1][1])
+            debugger
+            point[1] = graphdata[index-1][1]//stockmap.get(graphdata[index-1][1])
+            debugger
           }
 
           if(polaritymap.get(point[0]) !== undefined && polaritymap.get(point[0])!==0){
