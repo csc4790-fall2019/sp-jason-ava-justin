@@ -44,7 +44,11 @@ def get_json(ticker):
     response = requests.get(final_url)
     data = response.json()
     #logging.warning(data)
+    # print (data)
     return data
+
+#get_json('TSLA')
+
 
 def get_price(month, ticker):
     dictionary = {}
@@ -73,11 +77,36 @@ def monthly_stock_data_json(ticker):
     #logging.warning(data)
     return data
 
-def get_polarity():
-    test_phrase = "Tesla may have more bad news on the horizon analyst: Analyst"
-    test_phrase = TextBlob(test_phrase);
-    print("Polarity Score:")
-    print(test_phrase.sentiment.polarity);
+
+    ########JASON GET STOCK DATA
+def yearly_stock_data_json(ticker, year='2019'):
+    api_key = 'DJWUA73FEMJVIPST'
+    url_base = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={}&outputsize=full&apikey={}"
+    final_url = (url_base.format(ticker,api_key))
+    response = requests.get(final_url)
+    data = response.json()
+    yeardata = {}
+    for d in data['Time Series (Daily)']:
+        if year in d:
+            yeardata[d] = data['Time Series (Daily)'][d]['4. close']
+
+    # ctr=0
+    # for e in sorted(yeardata):
+    #     # print(e, ': ', yeardata[e])
+    #     print('[\'',e,'\',',yeardata[e],'],')
+    #     ctr+=1
+
+    return yeardata
+
+# yearly_stock_data_json('TSLA','2017')
+    ########
+
+#
+# def get_polarity():
+#     test_phrase = "Tesla may have more bad news on the horizon analyst: Analyst"
+#     test_phrase = TextBlob(test_phrase);
+#     print("Polarity Score:")
+#     print(test_phrase.sentiment.polarity);
 
 
 def get_title_guardian(company, startDate, endDate):
@@ -127,8 +156,11 @@ def get_title_guardian(company, startDate, endDate):
         for title in guardian_dictionary[date]:
             print title
     '''
-
+    for el in sorted(guardian_dictionary):
+        print(el,':',guardian_dictionary[el][0], '-> ', TextBlob(guardian_dictionary[el][0]).sentiment.polarity)
     return guardian_dictionary
+
+# get_title_guardian('Tesla','2017-01-01','2017-12-31')
 
 #only works for queries within the past 2 months
 def news_api(ticker, startDate, endDate):
@@ -165,7 +197,8 @@ def get_Stock_Data(company_ticker, month):
     if not month in range(1,13):
         abort(404)
 
-    stockdata = get_price(month, ticker)
+    # stockdata = get_price(month, ticker)
+    stockdata = yearly_stock_data_json(ticker) #going to need to add year here
     jsonify(stockdata)
 
     stockary = []
@@ -291,6 +324,8 @@ def apiPolarityV2(company_ticker,startDate,endDate):
 
     return jsonify({ 'Stock': company,
                      'PolarityScores': polarity })
+
+# apiPolarityV2('FB','2019-01-01','2019-01-29')
 
 @app.errorhandler(400)
 def bad_request(error):

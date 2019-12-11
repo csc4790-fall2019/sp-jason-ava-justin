@@ -34,7 +34,14 @@ export default class Display extends React.Component{
          }
         });
 
-        const polarityresponse = await fetch('http://127.0.0.1:5000/api/polarity/'+this.state.ticker+'/2019-08-01/2019-08-31',{
+        // const polarityresponse = await fetch('http://127.0.0.1:5000/api/polarity/'+this.state.ticker+'/2019-08-01/2019-08-31',{
+        //   headers : {
+        //     'Content-Type': 'application/json',
+        //     'Accept': 'application/json'
+        //   }
+        // });
+
+        const polarityresponse = await fetch('http://127.0.0.1:5000/api/polarity/v2/'+this.state.ticker+'/2019-01-01/2019-12-20',{
           headers : {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -55,15 +62,15 @@ export default class Display extends React.Component{
 
         var stockmap = new Map();
         stockres.forEach((element) => {
-          set.add(element[0]);
-          stockmap.set(element[0],element[1])
+          set.add(element[0]);                  //add date to the global set
+          stockmap.set(element[0],element[1])  //add to map
 
-          if(element[1]>this.state.highstock)
+          if(element[1]>this.state.highstock)  //keep track of highest stock
             this.setState({
               highstock: element[1]
             })
 
-          if(element[1]<this.state.lowstock)
+          if(element[1]<this.state.lowstock)  //keep track of lowest stock
             this.setState({
               lowstock: element[1]
             })
@@ -71,25 +78,28 @@ export default class Display extends React.Component{
 
         var polaritymap = new Map();
         polarityres.forEach((element) => {
-          set.add(element[0])
-          polaritymap.set(element[0],element[1])
+          set.add(element[0])                     //add date to the global set
+          polaritymap.set(element[0],element[1])  //add date the polarity
         })
 
         var graphdata = [];
         set.forEach((entry) => {graphdata.push([entry,0,0])})
 
         graphdata.forEach((point, index) => {
-          debugger
+          // debugger
           if(stockmap.get(point[0]) !== undefined)
             point[1] = stockmap.get(point[0])
+          else{
+            point[1] = stockmap.get(graphdata[index-1][1])
+          }
 
-          if(polaritymap.get(point[0]) !== undefined){
+          if(polaritymap.get(point[0]) !== undefined && polaritymap.get(point[0])!==0){
               var pol = polaritymap.get(point[0])
               pol = (pol + 1)*(this.state.highstock-this.state.lowstock)/2+this.state.lowstock
               point[2]= pol;
             }
            else if(index !== 0 ){
-            graphdata[index][2] = graphdata[index-1][2]
+            point[2] = graphdata[index-1][2]
            }
            else{
              graphdata[index][2] = (this.state.highstock-this.state.lowstock)/2 + this.state.lowstock
