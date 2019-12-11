@@ -86,8 +86,6 @@ export default class Display extends React.Component{
         var graphdata = [];
         set.forEach((entry) => {graphdata.push([entry,0,0])})
 
-        console.log(stockmap.get('2019-01-27'))
-
         graphdata.sort()
         graphdata.forEach((point, index) => {
 
@@ -95,9 +93,10 @@ export default class Display extends React.Component{
           if(stockmap.get(point[0]) !== undefined)
             point[1] = stockmap.get(point[0])
           else{
-            debugger
-            point[1] = graphdata[index-1][1]//stockmap.get(graphdata[index-1][1])
-            debugger
+              if(index == 0)
+                point[1] = this.state.lowstock+(this.state.highstock-this.state.lowstock)/2
+              else 
+                point[1] = graphdata[index-1][1]
           }
 
           if(polaritymap.get(point[0]) !== undefined && polaritymap.get(point[0])!==0){
