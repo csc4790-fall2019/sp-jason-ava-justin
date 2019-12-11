@@ -17,3 +17,7 @@ Studies suggest that stock prices rise with positive sentiment and fall with neg
 * pip install DateTime
 * pip install Flask-Cors
 * pip install boto3
+
+* npm i rebass
+* npm i @rebass/preset emotion-theming
+* npm install react-bootstrap bootstrap
