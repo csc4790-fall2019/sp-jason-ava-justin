@@ -47,9 +47,6 @@ def get_json(ticker):
     # print (data)
     return data
 
-#get_json('TSLA')
-
-
 def get_price(month, ticker):
     dictionary = {}
     stocks = get_json(ticker)
@@ -66,17 +63,6 @@ def get_price(month, ticker):
             dictionary["2019-08-{}".format(x+1)] = price
 
     return dictionary
-
-#looking into other uses of the alphavantage api
-def monthly_stock_data_json(ticker):
-    api_key = 'DJWUA73FEMJVIPST'
-    url_base = "https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={}&outputsize=full&apikey={}"
-    final_url = (url_base.format(ticker,api_key))
-    response = requests.get(final_url)
-    data = response.json()
-    #logging.warning(data)
-    return data
-
 
     ########JASON GET STOCK DATA
 def yearly_stock_data_json(ticker, year='2019'):
@@ -100,13 +86,6 @@ def yearly_stock_data_json(ticker, year='2019'):
 
 # yearly_stock_data_json('TSLA','2017')
     ########
-
-#
-# def get_polarity():
-#     test_phrase = "Tesla may have more bad news on the horizon analyst: Analyst"
-#     test_phrase = TextBlob(test_phrase);
-#     print("Polarity Score:")
-#     print(test_phrase.sentiment.polarity);
 
 
 def get_title_guardian(company, startDate, endDate):
@@ -159,32 +138,6 @@ def get_title_guardian(company, startDate, endDate):
     for el in sorted(guardian_dictionary):
         print(el,':',guardian_dictionary[el][0], '-> ', TextBlob(guardian_dictionary[el][0]).sentiment.polarity)
     return guardian_dictionary
-
-# get_title_guardian('Tesla','2017-01-01','2017-12-31')
-
-#only works for queries within the past 2 months
-def news_api(ticker, startDate, endDate):
-    api_key = '9d9f82a5686443d19a2116e137024848'
-    company = ticker
-    start_date = startDate
-    end_date = endDate
-
-    #q - Keywords or a phrase to search for.
-    #qInTitle - Keywords or phrases to search for in the article title only.
-    url_base = ( 'https://newsapi.org/v2/everything?'
-                 'q={}&'
-                 'qInTitle={}&'
-                 'from={}&'
-                 'to={}&'
-                 'sortBy=popularity&'
-                 'language=en&'
-                 'apiKey={}' )
-
-    final_url = (url_base.format(company, company, start_date,end_date, api_key))
-
-    response = requests.get(final_url)
-    f= open("test.txt","w+")
-    json.dump(response.json(), f)
 
 #a user would call this API and ask for stock data about a given company for a given month
 @app.route('/api/stockdata/<string:company_ticker>/<int:month>', methods=['GET'])
